@@ -148,6 +148,6 @@ router.post('/', addUser);
 router.put('/:_id', updateUser);
 router.delete('/:_id', deleteUser);
 router.post('/:userId/friends/:friendId', addFriend);
-router.delete('/:userId/friends/:friendId', deleteFriend);
+router.delete('/:userId/friends/:friendId', deleteFriend); 
 
 module.exports = router;
