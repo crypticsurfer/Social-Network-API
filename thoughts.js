@@ -52,10 +52,32 @@ const getThought = async (req, res, next) => {
     }
   }
 
+  const updateThought = async (req, res, next) => {
+    try {
+      const Thought = db.model('Thought');
+      const filter = { _id: req.params._id };
+      const instance = await Thought.findOne(filter).exec();
+  
+      if (!instance) {
+        res.status(404).json({ message: 'No thought with this id!' });
+        return;
+      }
+      
+      if (req.body.thoughtText) {
+        instance.thoughtText = req.body.thoughtText;
+      }
+      await instance.save();
+      console.log("Updated thought!");
+      res.send(instance);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+
 router.get('/', getAllThoughts);
 router.get('/:_id', getThought);
-
 router.post('/', addThought);
+router.put('/:_id', updateThought);
 
 module.exports = router;
 
