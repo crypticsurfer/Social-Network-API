@@ -34,7 +34,7 @@ const getThought = async (req, res, next) => {
       const User = db.model('User');
       const instance = new Thought();
       const userRef = await User.findOne({ _id: req.body.userId });
-      if (!instance) {
+      if (!userRef) {
         res.status(404).json({ message: 'No user with this userId!' });
         return;
       }
@@ -74,10 +74,35 @@ const getThought = async (req, res, next) => {
     }
   }
 
+  const deleteThought = async (req, res, next) => {
+    try {
+      const Thought = db.model('Thought');
+      const User = db.model('User');
+      const filter = { _id: req.params._id };
+      const instance = await Thought.findOneAndDelete(filter).exec();
+      if (!instance) {
+        res.status(404).json({ message: 'No thought with this id!' });
+        return;
+      }
+      const userFilter = { _id: instance.userId };
+      const userInstance = await User.findOne(userFilter).exec();
+      if (userInstance) {
+        console.log(instance._id);
+        userInstance.thoughts = userInstance.thoughts.filter( (thought) => thought.toString() !== instance._id.toString() );
+        userInstance.save();
+      }
+      console.log("Deleted thought!");
+      res.send(instance);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+
 router.get('/', getAllThoughts);
 router.get('/:_id', getThought);
 router.post('/', addThought);
 router.put('/:_id', updateThought);
+router.delete('/:_id', deleteThought);
 
 module.exports = router;
 
