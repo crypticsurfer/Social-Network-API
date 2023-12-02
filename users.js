@@ -112,12 +112,42 @@ const getAllUsers = async (req, res, next) => {
     }
   }
   
-  
+  const deleteFriend = async (req, res, next) => {
+    try {
+      const User = db.model('User');
+      const filter = { _id: req.params.userId };
+      const instance = await User.findOne(filter).exec();
+      if (!instance) {
+        res.status(404).json({ message: 'No user with this id!' });
+        return;
+      }
+      const secondFilter = { _id: req.params.friendId };
+      const friendInstance = await User.findOne(secondFilter).exec();
+      if (!friendInstance) {
+        res.status(404).json({ message: 'No friend with this id!' });
+        return;
+      }
+      const friendExists = instance.friends.filter( (friend) => friend.toString() === req.params.friendId );
+      if (friendExists.length == 0) {
+        res.status(500).json({ message: 'User does not have this friend!' });
+        return;
+      }
+      instance.friends = instance.friends.filter( (friend) => friend.toString() !== req.params.friendId );;
+      await instance.save();
+      console.log("Removed friend!");
+      res.send(instance);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+
+
 router.get('/', getAllUsers);
 router.get('/:_id', getUser);
 router.post('/', addUser);
 router.put('/:_id', updateUser);
 router.delete('/:_id', deleteUser);
 router.post('/:userId/friends/:friendId', addFriend);
+router.delete('/:userId/friends/:friendId', deleteFriend);
 
 module.exports = router;
