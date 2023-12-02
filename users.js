@@ -28,7 +28,22 @@ const getAllUsers = async (req, res, next) => {
     }
   }
 
+  const addUser = async (req, res, next) => {
+    try {
+      const User = db.model('User');
+      const instance = new User();
+      instance.username = req.body.username;
+      instance.email = req.body.email;
+      await instance.save();
+      console.log("Added user!");
+      res.send(instance);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+
 router.get('/', getAllUsers);
 router.get('/:_id', getUser);
+router.post('/', addUser);
 
 module.exports = router;
