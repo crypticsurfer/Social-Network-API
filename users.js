@@ -67,10 +67,28 @@ const getAllUsers = async (req, res, next) => {
     }
   }
   
+  const deleteUser = async (req, res, next) => {
+    try {
+      const User = db.model('User');
+      const filter = { _id: req.params._id };
+      const instance = await User.findOneAndDelete(filter).exec();
+      if (!instance) {
+        res.status(404).json({ message: 'No user with this id!' });
+        return;
+      }
+      console.log("Deleted user!");
+      res.send(instance);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+
 router.get('/', getAllUsers);
 router.get('/:_id', getUser);
 router.post('/', addUser);
 
 router.put('/:_id', updateUser);
+
+router.delete('/:_id', deleteUser);
 
 module.exports = router;
