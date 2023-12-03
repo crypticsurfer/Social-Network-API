@@ -98,11 +98,59 @@ const getThought = async (req, res, next) => {
     }
   }
 
+  const addReaction = async (req, res, next) => {
+    try {
+      const Thought = db.model('Thought');
+      const filter = { _id: req.params._id };
+      const instance = await Thought.findOne(filter).exec();
+      if (!instance) {
+        res.status(404).json({ message: 'No thought with this id!' });
+        return;
+      }
+      instance.reactions.push(req.body);
+      await instance.save();
+      console.log("Added reaction!");
+      res.json(instance);
+    } catch (err) {
+      return res.status(500).json(err);
+    }
+  }
+  
+  const deleteReaction = async (req, res, next) => {
+    try {
+      const Thought = db.model('Thought');
+      const filter = { reactionId: req.params.reactionId };
+      const instance = await Thought.findOne(filter).exec();
+      if (!instance) {
+        res.status(404).json({ message: 'No thought with this id!' });
+        return;
+      }
+  
+      const reaction = instance.reactions.filter( (reaction) => reaction.reactionId.toString() === req.params._reactionId );
+      if (reaction.length == 0) {
+        res.status(404).json({ message: 'No reaction with this id!' });
+        return;
+      }
+      instance.reactions = instance.reactions.filter( (reaction) => reaction.reactionId.toString() !== req.params._reactionId );
+      await instance.save();
+  
+      console.log("Deleted reaction!");
+      res.send(instance);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+
+ 
+  
 router.get('/', getAllThoughts);
 router.get('/:_id', getThought);
 router.post('/', addThought);
 router.put('/:_id', updateThought);
 router.delete('/:_id', deleteThought);
+router.post('/:_id/reactions', addReaction);
+router.delete('/:_id/reactions/:_reactionId', deleteReaction);
+
 
 module.exports = router;
 
